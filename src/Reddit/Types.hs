@@ -7,11 +7,8 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UndecidableInstances #-}
-module Reddit.Types
-    ( Thing (..)
-    , Listing (..)
-    , Link (..)
-    ) where
+module Reddit.Types(module Reddit.Types) where
+import Control.Lens (makeLenses)
 import Data.Aeson
 import Data.Aeson.TH
 import Data.Text (Text)
@@ -25,6 +22,7 @@ data Thing a = Thing{
 } deriving (Generic)
 
 $(deriveJSON defaultOptions {fieldLabelModifier = drop 1 . init} ''Thing)
+makeLenses ''Thing
 
 data Listing a = Listing{ 
     _before :: Maybe Text,
@@ -34,7 +32,18 @@ data Listing a = Listing{
 } deriving (Generic)
 
 $(deriveJSON defaultOptions {fieldLabelModifier = drop 1} ''Listing)
+makeLenses ''Listing
+
 {-
+class Votable a where
+    ups :: a -> Int
+    downs :: a -> Int
+    likes :: a -> Maybe Int
+
+class Created a where
+    created :: a -> Int
+    created_utc :: a -> Int
+
 data Votable = Votable { 
     _ups :: Int,
     _downs :: Int,
@@ -63,6 +72,7 @@ data Award = Award {
 } deriving (Generic)
 
 $(deriveJSON defaultOptions {fieldLabelModifier = drop 1} ''Award)
+makeLenses ''Award
 
 data Link = Link { 
     _author_flair_text :: Maybe Text,
@@ -92,3 +102,4 @@ data Link = Link {
 } deriving (Generic)
 
 $(deriveJSON defaultOptions {fieldLabelModifier = drop 1} ''Link)
+makeLenses ''Link
