@@ -12,7 +12,6 @@ module Lib
         , chapter
         , frequency
         ) where
-
 import GHC.Generics
 import Data.Aeson (FromJSON, ToJSON)
 import Data.Text (Text)
@@ -22,13 +21,6 @@ import Control.Lens
 import Data.Map as M hiding (foldl')
 import Data.List (intercalate, foldl', sortBy)
 import Data.Char
-
-{-
-data LiteraryWork = LiteraryWork {
-    _text :: Text
-} deriving (Generic, FromJSON, ToJSON)
--}
-
 
 data Chapter = Chapter {
     _chapter :: Int,

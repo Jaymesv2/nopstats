@@ -25,10 +25,10 @@ source-repository head
 
 library
   exposed-modules:
+      Config
       Lib
       Parser
       Reddit.Types
-      Reddit.Types.Lens
   other-modules:
       Paths_nop
   hs-source-dirs:
@@ -45,6 +45,7 @@ library
     , http-types ==0.12.*
     , lens ==5.1.*
     , parsec ==3.*
+    , regex-pcre-builtin ==0.95.*
     , text ==1.2.*
     , time >=1.9 && <2
     , unordered-containers >=0.2.18 && <0.3
@@ -70,6 +71,7 @@ executable nop-exe
     , lens ==5.1.*
     , nop
     , parsec ==3.*
+    , regex-pcre-builtin ==0.95.*
     , text ==1.2.*
     , time >=1.9 && <2
     , unordered-containers >=0.2.18 && <0.3
@@ -96,6 +98,7 @@ test-suite nop-test
     , lens ==5.1.*
     , nop
     , parsec ==3.*
+    , regex-pcre-builtin ==0.95.*
     , text ==1.2.*
     , time >=1.9 && <2
     , unordered-containers >=0.2.18 && <0.3

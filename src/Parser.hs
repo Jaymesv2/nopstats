@@ -9,29 +9,28 @@ import Text.Parsec as P hiding ((<|>))
 import Text.Parsec.Error
 import Text.Parsec.Pos
 import Reddit.Types
-import Reddit.Types.Lens
 import Control.Lens hiding (noneOf)
+import Text.Regex.PCRE
+import Text.Regex.PCRE.Text ()
+import Text.Read (readMaybe)
+import Data.Maybe
 
 parseChapter :: Link -> Either ParseError Chapter
 parseChapter l = unless ("The Nature of Predators" `T.isPrefixOf` (l ^. title)) (Left $ newErrorMessage (Expect "Not a valid chapter") (newPos (T.unpack $ l ^. title) 0 0)) >>
-                 runParser (chapterP chapterNum) () (T.unpack $ l ^. title) (l ^. selftext) <*> pure l
-                    where 
-                        chapterNum = if chapterNumStr == "" then 1 else read $ T.unpack chapterNumStr
-                        chapterNumStr = T.drop 24 (l ^. title)
+                 runParser (chapterP (fromMaybe 1 $ readMaybe (T.unpack $ T.drop 24 (l ^. title))) l) () (T.unpack $ l ^. title) (l ^. selftext)
 
-chapterP :: Int -> Parsec Text () (Link -> Chapter)
-chapterP chp = do
+chapterP :: Int -> Link -> Parsec Text () Chapter
+chapterP chp link = do
     firstChar <- anyChar
     when (firstChar /= '*') $ skipMany (noneOf "\r\n") <* string "\n\n\\---\n\n"
-    rawPerspective <- string "*" *> manyTill anyChar (try $ string "***\n\n")
+    rawPerspective <- string "*" *> manyTill anyChar (try $ string "\n\n")
     rawDate <- string "*" *> manyTill anyChar (try $ string "*\n\n")
     text <- T.pack <$> manyTill anyChar (try $ string "\\---\n\n")
-    let perspective = T.pack . drop 30 . filter (/= '*') $ rawPerspective
-        perspective' = perspective{-if T.elem ',' perspective || head perspective == "G"
-            then T.takeWhile (/=',') perspective
-            else last . T.words $ perspective-}
+    pure $ Chapter chp (extractPerspective . T.pack $ rawPerspective) (T.pack . drop 2 . dropWhile (/= ':') . filter (/= '*') $ rawDate) text link
 
-    pure $ Chapter chp perspective' (T.pack . drop 2 . dropWhile (/= ':') . filter (/= '*') $ rawDate) text
+extractPerspective :: Text -> Text
+extractPerspective = T.filter (/=',') . head . (\(_,_,_,x) -> x) . ((=~ perspectiveRegex) :: Text -> (Text, Text, Text, [Text]))
+    where perspectiveRegex = "\\*\\*\\*(?>(?>[a-zA-Z-]+ (?!of))*(\\S+)(?>(?>(?> of|,).+\\*\\*\\*)|\\*\\*\\*))" :: Text
 
 --cleanupHtml:: Text -> Text
 --cleanupHtml = T.replace "&lt;" "<" . T.replace "&gt;" ">"
