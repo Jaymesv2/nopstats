@@ -34,7 +34,12 @@ dependencies:
 - http-types ^>= 0.12 
 - time >= 1.9 && < 2
 - directory ^>= 1.3
+- Chart ^>= 1.9
+- Chart-diagrams ^>= 1.9
+- Chart-cairo ^>= 1.9
 - regex-pcre-builtin >= 0.95 && < 0.96
+
+# - gnuplot >= 0.5.7 && < 0.6
 # - regex-tdfa ^>= 1.3
 # - conduit ^>= 1.3
 # - reddit >= 0.2 && < 0.4

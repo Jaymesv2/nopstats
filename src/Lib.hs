@@ -28,7 +28,7 @@ data Chapter = Chapter {
     _date :: Text,
     _text :: Text,
     _original_post :: Link
-} deriving (Generic, FromJSON, ToJSON)
+} deriving (Generic, FromJSON, ToJSON, Show)
 makeLenses ''Chapter
 
 makeLengthsCsv :: [Chapter] -> String
@@ -59,10 +59,10 @@ makeWordCountCsv =
         _ -> ' '
     ) . T.toLower . (^. text))
     
-frequency' :: Ord a => Map a Int -> [a] -> Map a Int
+frequency' :: (Num n, Ord a) => Map a n -> [a] -> Map a n
 frequency' = foldl' (flip $ alter (Just . maybe 1 (+1)))
 
-frequency :: Ord a => [a] -> [(a, Int)]
+frequency :: (Num n, Ord a) => [a] -> [(a, n)]
 frequency = M.toList . foldl' (flip $ alter (Just . maybe 1 (+1))) M.empty
 
 chapterWordFrequency' :: Map Text Int -> Chapter -> Map Text Int
@@ -70,6 +70,3 @@ chapterWordFrequency' m chp = foldl' frequency' m (T.words <$> [chp ^. perspecti
 
 chaptersWordFrequency :: [Chapter] -> Map Text Int
 chaptersWordFrequency = foldl' chapterWordFrequency' M.empty
-
---chapterWordFrequency :: Chapter -> Map Text Int
---chapterWordFrequency chp = foldl' frequencies M.empty (T.words <$> [chp ^. perspective, chp ^. date, chp ^. text])

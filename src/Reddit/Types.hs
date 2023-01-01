@@ -14,7 +14,7 @@ import Data.Aeson.TH
 import Data.Text (Text)
 import GHC.Generics
 
-data Thing a = Thing{ 
+data Thing a = Thing { 
     _id' :: Maybe Text,
     _name' :: Maybe Text,
     _kind' :: Text,
@@ -69,7 +69,7 @@ data Award = Award {
     _coin_price :: Int,
     _coin_reward :: Int,
     _count :: Int
-} deriving (Generic)
+} deriving (Generic, Show)
 
 $(deriveJSON defaultOptions {fieldLabelModifier = drop 1} ''Award)
 makeLenses ''Award
@@ -99,7 +99,7 @@ data Link = Link {
     _downs :: Int,
     _created :: Int,
     _created_utc :: Int
-} deriving (Generic)
+} deriving (Generic, Show)
 
 $(deriveJSON defaultOptions {fieldLabelModifier = drop 1} ''Link)
 makeLenses ''Link
