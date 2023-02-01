@@ -8,6 +8,7 @@ import Network.HTTP.Client.TLS (tlsManagerSettings)
 import qualified Data.ByteString.Lazy as B
 import Data.Aeson 
 import Data.Aeson.Types
+import Control.Arrow
 import Data.Either 
 import Data.ByteString.Lazy (ByteString)
 import qualified Data.Text as T
@@ -68,8 +69,13 @@ main = do
             writeFile "perspectives.csv" $ makePerspectivesCsv chapters
             writeFile "word_counts.csv" $ makeWordCountCsv chapters
 
+            let chartOpts = def
+
             -- make charts
-            mapM_ (uncurry (renderableToFile def) . (_2 %~ ($ chapters))) [("perspectives.png", perspectivesPiChart)]
+            mapM_ (uncurry (renderableToFile chartOpts) . ((++ ".png") *** ($ chapters)))  -- appends .png to names and runs the chart function
+                [ ("perspectives", perspectivesPiChart)
+                , ("wordcount_by_perspective", perspectivesWordCountPiChart)
+                , ("average_words_by_perspective", perspectivesWordAveragePiChart) ]
 
             printf "Total length: %.0f words (%f pages), %.2f%% of Dune\n" totalWords (totalWords/ wordsPerPage) ((totalWords / duneWordCount)*100)
             printf "Average per chapter: %.0f words (%.1f pages)\n\n" avgWordCountPerChapter (totalWords / wordsPerPage)

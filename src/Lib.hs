@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveAnyClass, DeriveGeneric, OverloadedStrings, TemplateHaskell, LambdaCase #-}
+{-# LANGUAGE DeriveAnyClass, DeriveGeneric, OverloadedStrings, TemplateHaskell, LambdaCase, DeriveFunctor #-}
 module Lib  
         ( Chapter (..)
         , makeLengthsCsv
@@ -11,6 +11,8 @@ module Lib
         , perspective
         , chapter
         , frequency
+        , groupOn
+        , groupOnBy
         ) where
 import GHC.Generics
 import Data.Aeson (FromJSON, ToJSON)
@@ -41,7 +43,7 @@ makePerspectivesCsv :: [Chapter] -> String
 makePerspectivesCsv = 
     intercalate "\n" . 
     ("Perspective,Count":) . 
-    fmap (\(p, len) -> T.unpack p ++ "," ++ show len) .
+    fmap (\(p, len) -> T.unpack p ++ "," ++ (show :: Integer -> String) len) .
     sortBy (\(_, l1) (_, l2) -> compare l2 l1) .
     frequency .
     fmap (^. perspective)
@@ -50,7 +52,7 @@ makeWordCountCsv :: [Chapter] -> String
 makeWordCountCsv = 
     intercalate "\n" . 
     ("Word,Count":) . 
-    fmap (\(p, len) -> T.unpack p ++ "," ++ show len) .
+    fmap (\(p, len) -> T.unpack p ++ "," ++ (show :: Integer -> String) len) .
     sortBy (\(_, l1) (_, l2) -> compare l2 l1) .
     M.toList . 
     foldl' frequency' M.empty .
@@ -70,3 +72,9 @@ chapterWordFrequency' m chp = foldl' frequency' m (T.words <$> [chp ^. perspecti
 
 chaptersWordFrequency :: [Chapter] -> Map Text Int
 chaptersWordFrequency = foldl' chapterWordFrequency' M.empty
+
+groupOnBy :: (Ord a) => (m->m->m) -> [(a,m)] -> Map a m
+groupOnBy comb = foldl' (\m (x,y) -> insertWith comb x y m) M.empty
+
+groupOn :: (Ord a, Semigroup m) => [(a,m)] -> Map a m
+groupOn = groupOnBy (<>)
